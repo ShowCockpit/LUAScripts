@@ -11,6 +11,8 @@
 ---------------
 -- Changelog --
 ---------------
+-- 04-01-2019 - 1.2: Fix a display issue of "Record Option" log activity
+--                  + Fix horizontal grid arrangement when the start playback button is not = 1
 -- 30-10-2018 - 1.1: Fix a bug when the grid width is smaller than the number of cuelist to be created
 --                  + Fix the historical issue with the first cuelist creation which fails randomly
 -- 07-09-2018 - 1.0: Creation
@@ -28,7 +30,7 @@ Settings = {
 }
 
 ScriptInfos = {
-    version = "1.1",
+    version = "1.2",
     name = "CreatePlaybacksFromPresets"
 }
 
@@ -37,6 +39,8 @@ ScriptInfos = {
 ---------------
 -- Changelog --
 ---------------
+-- 29-12-2018 - 1.5: DeleteGroup() function & ListGroup() has been added
+-- 16-11-2018 - 1.4: InputNumber() function now accept MinValue as Infos to SetMinValue (default stays 1)
 -- 08-11-2018 - 1.3: New InputText() function
 --							+	New replace() function
 -- 07-09-2018 - 1.2: Fix input number max issue
@@ -58,7 +62,7 @@ if Settings.WaitTime == nil or Settings.WaitTime == "" then
 end
 
 PresetName = {
-    Intensity = "Intensity",
+  Intensity = "Intensity",
 	PanTilt = "PanTilt",
 	Color = "Color",
 	Gobo = "Gobo",
@@ -99,7 +103,7 @@ DefaultAppearance = {
 	Intensity = Appearance.White,
 	PanTilt = Appearance.Red,
 	Color = Appearance.White,
-    Gobo = Appearance.Green,
+  Gobo = Appearance.Green,
 	Beam = Appearance.Yellow,
 	BeamFX = Appearance.Cyan,
 	Framing = Appearance.Magenta
@@ -112,9 +116,9 @@ BPMTiming = {
 }
 
 Word = {
-    Script = {
-        Cancel = "Script has been cancelled! Nothing performed."
-    },
+	Script = {
+			Cancel = "Script has been cancelled! Nothing performed."
+	},
 	Ok = "Ok",
 	Cancel = "Cancel",
 	Reset = "Reset",
@@ -136,15 +140,15 @@ Form = {
 		Word.Yes,
 		Word.No
     },
-    Preset = {
-        PresetName.Intensity,
-        PresetName.PanTilt,
-        PresetName.Color,
-        PresetName.Gobo,
-        PresetName.Beam,
-        PresetName.BeamFX,
-        PresetName.Framing
-    }
+	Preset = {
+		PresetName.Intensity,
+		PresetName.PanTilt,
+		PresetName.Color,
+		PresetName.Gobo,
+		PresetName.Beam,
+		PresetName.BeamFX,
+		PresetName.Framing
+	}
 }
 
 -- Get Onyx Software object
@@ -228,7 +232,11 @@ function InputNumber(Infos)
 	-- Get the IntegerInput Prompt with default settings
 	Prompt = Input(Infos, "IntegerInput")
 	-- Prompt settings
-	Prompt.SetMinValue(1)
+	if Infos.MinValue then
+		Prompt.SetMinValue(Infos.MinValue)
+	else
+		Prompt.SetMinValue(1)
+	end
 	Prompt.SetMaxValue(10000)
 	if Infos.CurrentValue then
 		Prompt.SetDefaultValue(Infos.CurrentValue)
@@ -324,6 +332,16 @@ function KeyNumber(Number)
 		end
 		Sleep(Settings.WaitTime)
 	end
+end
+
+function DeleteGroup(GroupID)
+	Onyx.Key_ButtonClick("Delete")
+	Sleep(Settings.WaitTime)
+	Onyx.Key_ButtonClick("Group")
+	Sleep(Settings.WaitTime)
+	KeyNumber(GroupID)
+	Onyx.Key_ButtonClick("Enter")
+	return true
 end
 
 function RecordCuelist(CuelistID)
@@ -439,6 +457,19 @@ function ListCuelist(CuelistIDStart, CuelistIDEnd)
 	return Cuelists
 end
 
+function ListGroup(GroupIDStart, GroupIDEnd)
+	Groups = {}
+	for i = GroupIDStart, GroupIDEnd, 1 do
+		table.insert(
+			Groups,
+			{
+				id = i,
+				name = CheckEmpty(Onyx.GetGroupName(i))
+			}
+		)
+	end
+	return Groups
+end
 HeadPrint()
 -- End of Header --
 
@@ -619,8 +650,7 @@ for i = 1, Settings.NbOfGroups, 1 do
     if Cancelled(GroupID) then
         goto EXIT
     end
-
-    table.insert(Settings.Groups, {id = GroupID, name = Onyx.GetGroupName(GroupID)})
+    table.insert(Settings.Groups, {id = GroupID, name = CheckEmpty(Onyx.GetGroupName(GroupID))})
 end
 
 
@@ -765,7 +795,7 @@ LogActivity("\r\n\t" .. "- " .. Settings.TextOrientation .. " arrangement for " 
 Settings.StartingEmptyCueList = Onyx.GetNextCuelistNumber()
 
 -- RESUME of TIMING
-LogActivity(Content.Records.Options)
+LogActivity("\r\n" .. Content.Records.Options)
 LogActivity("\r\n\t" .. "- Create Cuelist(s) from n°" .. Settings.StartingEmptyCueList)
 LogActivity("\r\n\t" .. "- Cue Fade Time: " .. Settings.TimeFade .. "s")
 LogActivity("\r\n\t" .. "- Cuelist Release Time: " .. Settings.TimeRelease .. "s")
@@ -853,8 +883,8 @@ if Settings.Validation then
         if Settings.Orientation == true then -- Vertical Orientation
             Counter.PlaybackNumber = Settings.PlaybackButtonStart + i
         else -- Horizontal Orientation
-            if i == 1 and Counter.PlaybackNumber > Settings.PlaybackWidth then
-                Settings.PlaybackWidth = Settings.PlaybackWidth * math.ceil(Counter.PlaybackNumber / Settings.PlaybackWidth)
+            if i == 1 and Settings.NumberOfPreset > Settings.PlaybackWidth then
+                Settings.PlaybackWidth = Settings.PlaybackWidth * math.ceil(Settings.NumberOfPreset / Settings.PlaybackWidth)
             end
             Counter.PlaybackNumber = Settings.PlaybackButtonStart + (Settings.PlaybackWidth * i)
         end
