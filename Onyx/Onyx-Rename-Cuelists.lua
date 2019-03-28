@@ -1,4 +1,4 @@
--- ShowCockpit LUA Script: CreatePlaybacksFromPresets
+-- ShowCockpit LUA Script: RenameCuelists
 --   created on ShowCockpit v2.13.0
 --   by Spb8 Lighting
 --   on 08-11-2018
@@ -11,6 +11,7 @@
 ---------------
 -- Changelog --
 ---------------
+-- 28-03-2019 - 1.1: Increase WaitTime to avoid missing cue renaming
 -- 08-11-2018 - 1.0: Creation
 
 -------------------
@@ -18,11 +19,11 @@
 -------------------
 
 Settings = {
-  WaitTime = 0.1
+  WaitTime = 0.5
 }
 
 ScriptInfos = {
-  version = "1.0",
+  version = "1.1",
   name = "RenameCuelist"
 }
 
@@ -31,6 +32,9 @@ ScriptInfos = {
 ---------------
 -- Changelog --
 ---------------
+-- 04-01-2019 - 1.6: RecordPreset() function has been added
+-- 29-12-2018 - 1.5: DeleteGroup() function & ListGroup() has been added
+-- 16-11-2018 - 1.4: InputNumber() function now accept MinValue as Infos to SetMinValue (default stays 1)
 -- 08-11-2018 - 1.3: New InputText() function
 --							+	New replace() function
 -- 07-09-2018 - 1.2: Fix input number max issue
@@ -52,7 +56,7 @@ if Settings.WaitTime == nil or Settings.WaitTime == "" then
 end
 
 PresetName = {
-    Intensity = "Intensity",
+  Intensity = "Intensity",
 	PanTilt = "PanTilt",
 	Color = "Color",
 	Gobo = "Gobo",
@@ -93,7 +97,7 @@ DefaultAppearance = {
 	Intensity = Appearance.White,
 	PanTilt = Appearance.Red,
 	Color = Appearance.White,
-    Gobo = Appearance.Green,
+  Gobo = Appearance.Green,
 	Beam = Appearance.Yellow,
 	BeamFX = Appearance.Cyan,
 	Framing = Appearance.Magenta
@@ -106,9 +110,9 @@ BPMTiming = {
 }
 
 Word = {
-    Script = {
-        Cancel = "Script has been cancelled! Nothing performed."
-    },
+	Script = {
+			Cancel = "Script has been cancelled! Nothing performed."
+	},
 	Ok = "Ok",
 	Cancel = "Cancel",
 	Reset = "Reset",
@@ -130,15 +134,15 @@ Form = {
 		Word.Yes,
 		Word.No
     },
-    Preset = {
-        PresetName.Intensity,
-        PresetName.PanTilt,
-        PresetName.Color,
-        PresetName.Gobo,
-        PresetName.Beam,
-        PresetName.BeamFX,
-        PresetName.Framing
-    }
+	Preset = {
+		PresetName.Intensity,
+		PresetName.PanTilt,
+		PresetName.Color,
+		PresetName.Gobo,
+		PresetName.Beam,
+		PresetName.BeamFX,
+		PresetName.Framing
+	}
 }
 
 -- Get Onyx Software object
@@ -222,7 +226,11 @@ function InputNumber(Infos)
 	-- Get the IntegerInput Prompt with default settings
 	Prompt = Input(Infos, "IntegerInput")
 	-- Prompt settings
-	Prompt.SetMinValue(1)
+	if Infos.MinValue then
+		Prompt.SetMinValue(Infos.MinValue)
+	else
+		Prompt.SetMinValue(1)
+	end
 	Prompt.SetMaxValue(10000)
 	if Infos.CurrentValue then
 		Prompt.SetDefaultValue(Infos.CurrentValue)
@@ -320,6 +328,16 @@ function KeyNumber(Number)
 	end
 end
 
+function DeleteGroup(GroupID)
+	Onyx.Key_ButtonClick("Delete")
+	Sleep(Settings.WaitTime)
+	Onyx.Key_ButtonClick("Group")
+	Sleep(Settings.WaitTime)
+	KeyNumber(GroupID)
+	Onyx.Key_ButtonClick("Enter")
+	return true
+end
+
 function RecordCuelist(CuelistID)
 	Onyx.Key_ButtonClick("Record")
 	Sleep(Settings.WaitTime)
@@ -404,6 +422,25 @@ function DeletePreset(PresetType, PresetID)
 	return true
 end
 
+function RecordPreset(PresetType, Preset, Merging)
+	if PresetType == PresetName.PanTilt then
+		Onyx.RecordPanTiltPreset(Preset.Position, Preset.Name, Merging)
+	elseif PresetType == PresetName.Color then
+		Onyx.RecordColorPreset(Preset.Position, Preset.Name, Merging)
+	elseif PresetType == PresetName.Intensity then
+		Onyx.RecordIntensityPreset(Preset.Position, Preset.Name, Merging)
+	elseif PresetType == PresetName.Gobo then
+		Onyx.RecordGoboPreset(Preset.Position, Preset.Name, Merging)
+	elseif PresetType == PresetName.Beam then
+		Onyx.RecordBeamPreset(Preset.Position, Preset.Name, Merging)
+	elseif PresetType == PresetName.BeamFX then
+		Onyx.RecordBeamFXPreset(Preset.Position, Preset.Name, Merging)
+	elseif PresetType == PresetName.Framing then
+		Onyx.RecordFramingPreset(Preset.Position, Preset.Name, Merging)
+	end
+	return true
+end
+
 function ListPreset(PresetType, PresetIDStart, PresetIDEnd)
 	Presets = {}
 	for i = PresetIDStart, PresetIDEnd, 1 do
@@ -433,6 +470,19 @@ function ListCuelist(CuelistIDStart, CuelistIDEnd)
 	return Cuelists
 end
 
+function ListGroup(GroupIDStart, GroupIDEnd)
+	Groups = {}
+	for i = GroupIDStart, GroupIDEnd, 1 do
+		table.insert(
+			Groups,
+			{
+				id = i,
+				name = CheckEmpty(Onyx.GetGroupName(i))
+			}
+		)
+	end
+	return Groups
+end
 HeadPrint()
 -- End of Header --
 
