@@ -15,7 +15,7 @@ while true do
 	-- Calculate the fader level (assuming speed recorded at 100%)
 	faderLevel = math.sqrt(bpm/300)
 	
-	// Move the Override fader to set the FX speed
+	-- Move the Override fader to set the FX speed
 	Onyx.MainPlaybackFader_FaderMove(8, faderLevel)
 	
 	sleep(0.01)
