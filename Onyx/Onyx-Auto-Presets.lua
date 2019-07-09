@@ -1,4 +1,4 @@
--- ShowCockpit LUA Script: DeleteRangeOfCuelist
+-- ShowCockpit LUA Script: Onyx Auto Presets
 --   created on ShowCockpit v2.15.2
 --   by Spb8 Lighting
 --   on 15-11-2018
