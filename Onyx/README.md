@@ -1,18 +1,20 @@
 # Onyx Lua Scripts for ShowCockpit
 
-This folder contains some LUA script which can be run from ShowCockpit to interact with Onyx.
+This repository contains some LUA script which can be run from ShowCockpit to interact with Onyx.
 
 ## Script List
 
-* [Onyx-Delete-Cuelists.lua](/Onyx/Onyx-Delete-Cuelists.lua) - This script allows to delete a range of cuelist (batch mode)
-* [Onyx-Delete-Presets.lua](/Onyx/Onyx-Delete-Presets.lua) - This script allows to delete a range of presets (batch mode)
-* [Onyx-Update-CueFade-CuelistRelease.lua](/Onyx/Onyx-Update-CueFade-CuelistRelease.lua) - This script allows to update the cues fade times in the meantime of the cuelist release time
-* [Onyx-Create-Playbacks-from-Presets.lua](/Onyx/Onyx-Create-Playbacks-from-Presets.lua) - This script allows to create playback(s) cuelist from preset(s)
-* [Onyx-Rename-Cuelists.lua](/Onyx/Onyx-Rename-Cuelists.lua) - This script allows to rename cuelist(s) massively (replace a searched value by another value)
+<!---* [Onyx-Delete-Groups.lua](https://github.com/Spb8Lighting/OnyxLuaScripts/blob/master/dist/Onyx-Delete-Groups.lua) - This script allows to delete a range of group (batch mode) -->
+* [Onyx-Auto-Presets.lua](https://github.com/Spb8Lighting/OnyxLuaScripts/blob/master/dist/Onyx-Auto-Presets.lua) - This script allows to create a bunch of presets in a second. It can also populate some of them based on a group of selection
+* [Onyx-Delete-Cuelists.lua](https://github.com/Spb8Lighting/OnyxLuaScripts/blob/master/dist/Onyx-Delete-Cuelists.lua) - This script allows to delete a range of cuelist (batch mode)
+* [Onyx-Delete-Presets.lua](https://github.com/Spb8Lighting/OnyxLuaScripts/blob/master/dist/Onyx-Delete-Presets.lua) - This script allows to delete a range of presets (batch mode)
+* [Onyx-Update-CueFade-CuelistRelease.lua](https://github.com/Spb8Lighting/OnyxLuaScripts/blob/master/dist/Onyx-Update-CueFade-CuelistRelease.lua) - This script allows to update the cues fade times in the meantime of the cuelist release time
+* [Onyx-Create-Playbacks-from-Presets.lua](https://github.com/Spb8Lighting/OnyxLuaScripts/blob/master/dist/Onyx-Create-Playbacks-from-Presets.lua) - This script allows to create playback(s) cuelist from preset(s)
+* [Onyx-Rename-Cuelists.lua](https://github.com/Spb8Lighting/OnyxLuaScripts/blob/master/dist/Onyx-Rename-Cuelists.lua) - This script allows to rename cuelist(s) massively (replace a searched value by another value)
 
-## Lua Functions
+## Lua Fonctions
 
-Inside the [header.lua](/Onyx/header.lua) script which is include in all scripts, you have access to some functions. Theses last are detailed below if you want to create your own script based on it.
+Inside the [header.lua](https://github.com/Spb8Lighting/OnyxLuaScripts/blob/master/assets/header.lua) script which is include in all scripts, you have access to some functions. Theses last are detailed below if you want to create your own script based on it.
 
 ### Logging function
 
@@ -103,6 +105,11 @@ Inside the [header.lua](/Onyx/header.lua) script which is include in all scripts
     <p>This function will return an array of JSON object {id,name} with all Cuelist name from ID CuelistIDStart to ID CuelistIDEnd</p>
 </details>
 <details>
+    <summary>ListGroup(GroupIDStart, GroupIDEnd)</summary>
+    <p>Arguments: int GroupIDStart, int GroupIDEnd</p>
+    <p>This function will return an array of JSON object {id,name} with all Group name from ID GroupIDStart to ID GroupIDEnd</p>
+</details>
+<details>
     <summary>DeletePreset(PresetType, PresetID)</summary>
     <p>Arguments: string PresetType [Intensity|PanTilt|Color|Gobo|Beam|BeamFX|Framing], int PresetID</p>
     <p>This function will delete the Preset of PresetType with ID PresetID</p>
@@ -125,6 +132,17 @@ Inside the [header.lua](/Onyx/header.lua) script which is include in all scripts
     <p>Dependency: KeyNumber()</p>
     <p>This function will record a new cuelist (of the latest recorded cuelist type) with ID CuelistID</p>
 </details>
+<details>
+    <summary>RecordPreset(PresetType, Preset, Merging)</summary>
+    <p>Arguments: string PresetType [Intensity|PanTilt|Color|Gobo|Beam|BeamFX|Framing], JSON Preset {Position: int, Name: string}, boolean Merging</p>
+    <p>This function will create a preset of the provided PresetType at Preset.Position named Preset.Name. You can merge the preset creation by setting Merging to true, false will overwrite</p>
+</details>
+<!---<details>
+    <summary>DeleteGroup(GroupID)</summary>
+    <p>Arguments: int GroupID</p>
+    <p>Dependency: KeyNumber()</p>
+    <p>This function will delete a group with ID GroupID</p>
+</details>-->
 <details>
     <summary>KeyNumber(Number)</summary>
     <p>Arguments: int number</p>
